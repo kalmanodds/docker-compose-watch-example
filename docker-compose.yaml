@@ -2,11 +2,30 @@ version: "3"
 services:
   next-app:
     container_name: next-app
+    restart: always
     build:
       dockerfile: Dockerfile
-    volumes:
-      - ./src:/app/src
-      - ./public:/app/public
-    restart: always
+    environment:
+      POSTGRES_URL: ${DOCKER_POSTGRES_URL}
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules/
+        - action: sync
+          path: ./public
+          target: /app/public
     ports:
       - 3000:3000
+  postgres-db:
+    image: postgres:16.0
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: example
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123
+    ports:
+      - 5432:5432
